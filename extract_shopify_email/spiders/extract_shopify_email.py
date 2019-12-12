@@ -6,6 +6,8 @@ import scrapy
 from redis import StrictRedis
 from scrapy.utils import spider
 
+from extract_shopify_email.settings import DEFAULT_REQUEST_HEADERS
+
 contact_us_res = r"""<a.*?href="(.*?)".*?>contact.*?</a>"""
 about_us_res = r"""<a.*?href="(.*?)".*?>about.*?</a>"""
 email_rex = r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)"
@@ -18,9 +20,9 @@ def extract_email_from_url(domain: str, url: str):
     if domain.endswith('/'):
         domain = domain[: len(domain) - 1]
     if url.startswith('http'):
-        response = requests.get(url)
+        response = requests.get(url, headers=DEFAULT_REQUEST_HEADERS, timeout=10)
     else:
-        response = requests.get(domain + url)
+        response = requests.get(domain + url, headers=DEFAULT_REQUEST_HEADERS, timeout=10)
     if response.ok:
         email_m = re.search(email_rex, response.text)
         if email_m and not (email_m.group(1).endswith('png') or email_m.group(1).endswith('jpg')):
@@ -32,7 +34,7 @@ class ExtractShopifyEmail(scrapy.Spider):
     name = 'extract_shopify_email'
     REDIS_DS_KEY = 'shopify-email'
     REDIS_RS_KEY = 'shopify-result'
-    redis = StrictRedis(host='www.daoyang.top', port=6379, db=0)
+    redis = StrictRedis(host='124.156.206.235', port=6379, db=0)
 
     def start_requests(self):
 
