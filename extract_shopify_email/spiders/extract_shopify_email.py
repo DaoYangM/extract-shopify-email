@@ -15,7 +15,6 @@ facebook_rex = r'href="(https://www.facebook.com/.*?)"'
 twitter_rex = r'href="(https://(www.)?twitter.com/.*?)"'
 instagram_rex = r'href="(https://www.instagram.com/.*?)"'
 
-name = 'extract_shopify_email'
 REDIS_DS_KEY = 'shopify-email'
 REDIS_RS_KEY = 'shopify-result'
 redis = StrictRedis(host='124.156.206.235', port=6379, db=0)
@@ -36,6 +35,7 @@ def extract_email_from_url(domain: str, url: str):
 
 
 class ExtractShopifyEmail(scrapy.Spider):
+    name = 'extract_shopify_email'
 
     def start_requests(self):
 
