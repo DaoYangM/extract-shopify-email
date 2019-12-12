@@ -3,7 +3,7 @@ import re
 
 import requests
 import scrapy
-from redis import StrictRedis
+from redis import Redis
 from scrapy.utils import spider
 
 from extract_shopify_email.settings import DEFAULT_REQUEST_HEADERS
@@ -17,7 +17,6 @@ instagram_rex = r'href="(https://www.instagram.com/.*?)"'
 
 REDIS_DS_KEY = 'shopify-email'
 REDIS_RS_KEY = 'shopify-result'
-redis = StrictRedis(host='124.156.206.235', port=6379, db=0)
 
 
 def extract_email_from_url(domain: str, url: str):
@@ -30,7 +29,9 @@ def extract_email_from_url(domain: str, url: str):
         response = requests.get(domain + url, headers=DEFAULT_REQUEST_HEADERS, timeout=(10, 10))
     spider.logger.info("Requests after...")
     if response.ok:
+        spider.logger.info("EXTRACT EMAIL FROM UEL BEFORE")
         email_m = re.search(email_rex, response.text)
+        spider.logger.info("EXTRACT EMAIL FROM UEL AFTER")
         if email_m and not (email_m.group(1).endswith('png') or email_m.group(1).endswith('jpg')):
             return email_m.group(1)
     return None
@@ -40,10 +41,11 @@ class ExtractShopifyEmail(scrapy.Spider):
     name = 'extract_shopify_email'
 
     def start_requests(self):
-
+        redis = Redis(host='124.156.206.235', port=6379, db=0)
         while redis.llen(REDIS_DS_KEY) > 0:
             spider.logger.info("REDIS POP BEFORE")
             email = redis.lpop(REDIS_DS_KEY)
+            redis.close()
             spider.logger.info("REDIS POP AFTER")
             if email:
                 yield scrapy.Request(bytes.decode(email), callback=self.parse)
@@ -54,6 +56,7 @@ class ExtractShopifyEmail(scrapy.Spider):
         # yield scrapy.Request('https://balsacircle.com/', callback=self.parse)
 
     def parse(self, response):
+        client = Redis(host='124.156.206.235', port=6379, db=0)
         body = bytes.decode(response.body, encoding=response.encoding)
 
         email_m = re.search(email_rex, body)
@@ -103,5 +106,6 @@ class ExtractShopifyEmail(scrapy.Spider):
 
         }
 
-        redis.lpush(REDIS_RS_KEY, json.dumps(data))
+        client.lpush(REDIS_RS_KEY, json.dumps(data))
         spider.logger.info("REDIS LPUSH success")
+        client.close()
