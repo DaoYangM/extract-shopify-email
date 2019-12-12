@@ -56,13 +56,21 @@ class ExtractShopifyEmail(scrapy.Spider):
         # yield scrapy.Request('https://balsacircle.com/', callback=self.parse)
 
     def parse(self, response):
+        spider.logger.info("GET PARSE...")
         client = Redis(host='124.156.206.235', port=6379, db=0)
         body = bytes.decode(response.body, encoding=response.encoding)
 
         email_m = re.search(email_rex, body)
+        spider.logger.info("GET email_m...")
+
         facebook_m = re.search(facebook_rex, body)
+        spider.logger.info("GET facebook_m...")
+
         twitter_m = re.search(twitter_rex, body)
+        spider.logger.info("GET twitter_m...")
+
         instagram_m = re.search(instagram_rex, body)
+        spider.logger.info("GET instagram_m...")
 
         email = None
         facebook = None

@@ -11,7 +11,7 @@
 
 BOT_NAME = 'extract_shopify_email'
 
-DOWNLOAD_TIMEOUT = 30
+DOWNLOAD_TIMEOUT = 15
 
 SPIDER_MODULES = ['extract_shopify_email.spiders']
 NEWSPIDER_MODULE = 'extract_shopify_email.spiders'
