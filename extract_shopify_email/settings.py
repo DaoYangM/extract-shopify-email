@@ -52,7 +52,7 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 15
 CONCURRENT_REQUESTS_PER_IP = 15
 
 LOG_LEVEL = 'DEBUG'
-LOG_FILE = './logger.log'
+# LOG_FILE = './logger.log'
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
 
