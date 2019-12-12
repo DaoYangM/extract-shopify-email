@@ -90,6 +90,7 @@ class ExtractShopifyEmail(scrapy.Spider):
                     if email:
                         spider.logger.info('Find email from [contact] page')
 
+        spider.logger.info("BEFORE FACEBOOK...")
         if facebook_m:
             facebook = facebook_m.group(1)
         if twitter_m:
