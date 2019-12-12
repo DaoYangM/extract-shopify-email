@@ -11,7 +11,7 @@
 
 BOT_NAME = 'extract_shopify_email'
 
-DOWNLOAD_TIMEOUT = 10
+DOWNLOAD_TIMEOUT = 30
 
 SPIDER_MODULES = ['extract_shopify_email.spiders']
 NEWSPIDER_MODULE = 'extract_shopify_email.spiders'
@@ -48,11 +48,11 @@ CONCURRENT_REQUESTS = 10
 # See also autothrottle settings and docs
 #DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 10
-CONCURRENT_REQUESTS_PER_IP = 10
+CONCURRENT_REQUESTS_PER_DOMAIN = 15
+CONCURRENT_REQUESTS_PER_IP = 15
 
 LOG_LEVEL = 'DEBUG'
-# LOG_FILE = './logger.log'
+LOG_FILE = './logger.log'
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
 

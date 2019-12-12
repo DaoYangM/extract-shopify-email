@@ -20,9 +20,9 @@ def extract_email_from_url(domain: str, url: str):
     if domain.endswith('/'):
         domain = domain[: len(domain) - 1]
     if url.startswith('http'):
-        response = requests.get(url, headers=DEFAULT_REQUEST_HEADERS, timeout=10)
+        response = requests.get(url, headers=DEFAULT_REQUEST_HEADERS, timeout=(10, 10))
     else:
-        response = requests.get(domain + url, headers=DEFAULT_REQUEST_HEADERS, timeout=10)
+        response = requests.get(domain + url, headers=DEFAULT_REQUEST_HEADERS, timeout=(10, 10))
     if response.ok:
         email_m = re.search(email_rex, response.text)
         if email_m and not (email_m.group(1).endswith('png') or email_m.group(1).endswith('jpg')):
