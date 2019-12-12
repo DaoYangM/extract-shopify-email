@@ -23,6 +23,7 @@ USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36
 COOKIES_ENABLED = False
 
 DEFAULT_REQUEST_HEADERS = {
+
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
   'Accept-Encoding': 'gzip, deflate, br',
   'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ja;q=0.6',
@@ -32,7 +33,8 @@ DEFAULT_REQUEST_HEADERS = {
   'sec-fetch-mode': 'navigate',
   'sec-fetch-site': 'same-origin',
   'sec-fetch-user': '?1',
-  'upgrade-insecure-requests': '1'
+  'upgrade-insecure-requests': '1',
+  'Content-Type': 'text/html; charset=utf-8'
 }
 
 # Obey robots.txt rules

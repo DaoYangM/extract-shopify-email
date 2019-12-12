@@ -43,10 +43,10 @@ class ExtractShopifyEmail(scrapy.Spider):
             else:
                 break
 
-        # yield scrapy.Request('https://phurenutrition.com', callback=self.parse)
+        # yield scrapy.Request('https://balsacircle.com/', callback=self.parse)
 
     def parse(self, response):
-        body = bytes.decode(response.body)
+        body = bytes.decode(response.body, encoding=response.encoding)
 
         email_m = re.search(email_rex, body)
         facebook_m = re.search(facebook_rex, body)
