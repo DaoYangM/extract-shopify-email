@@ -98,3 +98,4 @@ class ExtractShopifyEmail(scrapy.Spider):
         }
 
         self.redis.lpush(self.REDIS_RS_KEY, json.dumps(data))
+        spider.logger.info("REDIS LPUSH success")
