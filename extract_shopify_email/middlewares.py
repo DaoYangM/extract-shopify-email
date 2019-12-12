@@ -6,6 +6,8 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.settings.default_settings import RETRY_HTTP_CODES
+from urllib import request as rq
 
 
 class ExtractShopifyEmailSpiderMiddleware(object):
@@ -87,6 +89,14 @@ class ExtractShopifyEmailDownloaderMiddleware(object):
         # - return a Response object
         # - return a Request object
         # - or raise IgnoreRequest
+
+        if response.status in RETRY_HTTP_CODES:
+            res = rq.urlopen("http://118.24.52.95/get/")
+            res = res.read()
+            proxy = eval(bytes.decode(res))['proxy']
+            request.meta['proxy'] = "http://" + str(proxy)
+            spider.logger.info('Request throttle requests setting proxy %s', "http://"+str(proxy))
+            return request
         return response
 
     def process_exception(self, request, exception, spider):

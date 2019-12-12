@@ -16,6 +16,7 @@ DOWNLOAD_TIMEOUT = 10
 SPIDER_MODULES = ['extract_shopify_email.spiders']
 NEWSPIDER_MODULE = 'extract_shopify_email.spiders'
 
+RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429, 430]
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'extract_shopify_email (+http://www.yourdomain.com)'
