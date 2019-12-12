@@ -1,4 +1,3 @@
-import csv
 import json
 import re
 
@@ -19,8 +18,9 @@ def extract_email_from_url(domain: str, url: str):
     if domain.endswith('/'):
         domain = domain[: len(domain) - 1]
     if url.startswith('http'):
-        url = url.replace(domain, '')
-    response = requests.get(domain + url)
+        response = requests.get(url)
+    else:
+        response = requests.get(domain + url)
     if response.ok:
         email_m = re.search(email_rex, response.text)
         if email_m and not (email_m.group(1).endswith('png') or email_m.group(1).endswith('jpg')):
@@ -43,6 +43,8 @@ class ExtractShopifyEmail(scrapy.Spider):
             else:
                 break
 
+        # yield scrapy.Request('https://phurenutrition.com', callback=self.parse)
+
     def parse(self, response):
         body = bytes.decode(response.body)
 
@@ -58,24 +60,24 @@ class ExtractShopifyEmail(scrapy.Spider):
 
         if email_m and not (email_m.group(1).endswith('png') or email_m.group(1).endswith('jpg')):
             email = email_m.group(1)
-            spider.logger.info('find email from [main] page')
+            spider.logger.info('Find email from [main] page')
         else:
             is_find_email = False
             contact_us = re.search(contact_us_res, body, re.I)
             if contact_us:
-                spider.logger.info('find contact from main page')
+                spider.logger.info('Find contact from main page')
                 email = extract_email_from_url(response.url, contact_us.group(1))
                 if email:
-                    spider.logger.info('find email from [contact] page')
+                    spider.logger.info('Find email from [contact] page')
                     is_find_email = True
 
             if not is_find_email:
                 about_us = re.search(about_us_res, body, re.I)
                 if about_us:
-                    spider.logger.info('find about from main page')
+                    spider.logger.info('Find about from main page')
                     email = extract_email_from_url(response.url, about_us.group(1))
                     if email:
-                        spider.logger.info('find email from [contact] page')
+                        spider.logger.info('Find email from [contact] page')
 
         if facebook_m:
             facebook = facebook_m.group(1)

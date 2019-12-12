@@ -6,8 +6,8 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-from scrapy.settings.default_settings import RETRY_HTTP_CODES
 from urllib import request as rq
+from extract_shopify_email.settings import RETRY_HTTP_CODES
 
 
 class ExtractShopifyEmailSpiderMiddleware(object):
