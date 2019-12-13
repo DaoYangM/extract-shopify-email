@@ -51,8 +51,8 @@ CONCURRENT_REQUESTS = 10
 CONCURRENT_REQUESTS_PER_DOMAIN = 10
 CONCURRENT_REQUESTS_PER_IP = 10
 
-LOG_LEVEL = 'DEBUG'
-# LOG_FILE = './logger.log'
+LOG_LEVEL = 'INFO'
+LOG_FILE = './logger.log'
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
 
@@ -101,7 +101,7 @@ AUTOTHROTTLE_MAX_DELAY = 10
 # each remote server
 AUTOTHROTTLE_TARGET_CONCURRENCY = 2.0
 # Enable showing throttling stats for every response received:
-AUTOTHROTTLE_DEBUG = True
+AUTOTHROTTLE_DEBUG = False
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings

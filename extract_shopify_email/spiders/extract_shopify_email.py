@@ -8,12 +8,12 @@ from scrapy.utils import spider
 
 from extract_shopify_email.settings import DEFAULT_REQUEST_HEADERS
 
-contact_us_res = r"""<a.*?href="(.*?)".*?>contact.*?</a>"""
-about_us_res = r"""<a.*?href="(.*?)".*?>about.*?</a>"""
-email_rex = r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)"
-facebook_rex = r'href="(https://www.facebook.com/.*?)"'
-twitter_rex = r'href="(https://(www.)?twitter.com/.*?)"'
-instagram_rex = r'href="(https://www.instagram.com/.*?)"'
+contact_us_res = re.compile(r'<a .*?href="(.*?)" .*?>contact us</a>')
+about_us_res = re.compile(r'<a .*?href="(.*?)" .*?>about us</a>')
+email_rex = re.compile(r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)")
+facebook_rex = re.compile(r'href="(https://www.facebook.com/.*?)"')
+twitter_rex = re.compile(r'href="(https://(www.)?twitter.com/.*?)"')
+instagram_rex = re.compile(r'href="(https://www.instagram.com/.*?)"')
 
 REDIS_DS_KEY = 'shopify-email'
 REDIS_RS_KEY = 'shopify-result'
@@ -22,16 +22,16 @@ REDIS_RS_KEY = 'shopify-result'
 def extract_email_from_url(domain: str, url: str):
     if domain.endswith('/'):
         domain = domain[: len(domain) - 1]
-    spider.logger.info("Requests before...")
+    spider.logger.debug("Requests before...")
     if url.startswith('http'):
         response = requests.get(url, headers=DEFAULT_REQUEST_HEADERS, timeout=(10, 10))
     else:
         response = requests.get(domain + url, headers=DEFAULT_REQUEST_HEADERS, timeout=(10, 10))
-    spider.logger.info("Requests after...")
+    spider.logger.debug("Requests after...")
     if response.ok:
-        spider.logger.info("EXTRACT EMAIL FROM UEL BEFORE")
-        email_m = re.search(email_rex, response.text)
-        spider.logger.info("EXTRACT EMAIL FROM UEL AFTER")
+        spider.logger.debug("EXTRACT EMAIL FROM UEL BEFORE")
+        email_m = email_rex.search(response.text)
+        spider.logger.debug("EXTRACT EMAIL FROM UEL AFTER")
         if email_m and not (email_m.group(1).endswith('png') or email_m.group(1).endswith('jpg')):
             return email_m.group(1)
     return None
@@ -41,36 +41,36 @@ class ExtractShopifyEmail(scrapy.Spider):
     name = 'extract_shopify_email'
 
     def start_requests(self):
-        redis = Redis(host='124.156.206.235', port=6379, db=0)
+        redis = Redis(host='www.daoyang.top', port=6379, db=0)
         while redis.llen(REDIS_DS_KEY) > 0:
-            spider.logger.info("REDIS POP BEFORE")
+            spider.logger.debug("REDIS POP BEFORE")
             email = redis.lpop(REDIS_DS_KEY)
             redis.close()
-            spider.logger.info("REDIS POP AFTER")
+            spider.logger.debug("REDIS POP AFTER")
             if email:
                 yield scrapy.Request(bytes.decode(email), callback=self.parse)
-                spider.logger.info("REDIS YIELD YIELD YIELD YIELD")
+                spider.logger.debug("REDIS YIELD YIELD YIELD YIELD")
             else:
                 break
 
         # yield scrapy.Request('https://balsacircle.com/', callback=self.parse)
 
     def parse(self, response):
-        spider.logger.info("GET PARSE...")
-        client = Redis(host='124.156.206.235', port=6379, db=0)
+        spider.logger.debug("GET PARSE...")
+        client = Redis(host='www.daoyang.top', port=6379, db=0)
         body = bytes.decode(response.body, encoding=response.encoding)
 
-        email_m = re.search(email_rex, body)
-        spider.logger.info("GET email_m...")
+        email_m = email_rex.search(body)
+        spider.logger.debug("GET email_m...")
 
-        facebook_m = re.search(facebook_rex, body)
-        spider.logger.info("GET facebook_m...")
+        facebook_m = facebook_rex.search(body)
+        spider.logger.debug("GET facebook_m...")
 
-        twitter_m = re.search(twitter_rex, body)
-        spider.logger.info("GET twitter_m...")
+        twitter_m = twitter_rex.search(body)
+        spider.logger.debug("GET twitter_m...")
 
-        instagram_m = re.search(instagram_rex, body)
-        spider.logger.info("GET instagram_m...")
+        instagram_m = instagram_rex.search(body)
+        spider.logger.debug("GET instagram_m...")
 
         email = None
         facebook = None
@@ -82,7 +82,9 @@ class ExtractShopifyEmail(scrapy.Spider):
             spider.logger.info('Find email from [main] page')
         else:
             is_find_email = False
-            contact_us = re.search(contact_us_res, body, re.I)
+            spider.logger.info("MATCH CONTACT_US START... " + response.url)
+            contact_us = contact_us_res.search(body, re.I)
+            spider.logger.info("MATCH CONTACT_US AFTER...")
             if contact_us:
                 spider.logger.info('Find contact from main page')
                 email = extract_email_from_url(response.url, contact_us.group(1))
@@ -91,14 +93,16 @@ class ExtractShopifyEmail(scrapy.Spider):
                     is_find_email = True
 
             if not is_find_email:
-                about_us = re.search(about_us_res, body, re.I)
+                spider.logger.info("MATCH ABOUT_US START...")
+                about_us = about_us_res.search(body, re.I)
+                spider.logger.info("MATCH ABOUT_US AFTER...")
                 if about_us:
                     spider.logger.info('Find about from main page')
                     email = extract_email_from_url(response.url, about_us.group(1))
                     if email:
                         spider.logger.info('Find email from [contact] page')
 
-        spider.logger.info("BEFORE FACEBOOK...")
+        spider.logger.debug("BEFORE FACEBOOK...")
         if facebook_m:
             facebook = facebook_m.group(1)
         if twitter_m:
@@ -116,5 +120,5 @@ class ExtractShopifyEmail(scrapy.Spider):
         }
 
         client.lpush(REDIS_RS_KEY, json.dumps(data))
-        spider.logger.info("REDIS LPUSH success")
+        spider.logger.debug("REDIS LPUSH success")
         client.close()
