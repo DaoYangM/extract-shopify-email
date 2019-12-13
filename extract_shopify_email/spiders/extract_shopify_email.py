@@ -31,7 +31,7 @@ def extract_email_from_url(domain: str, url: str):
     spider.logger.debug("Requests after...")
     if response.ok:
         spider.logger.debug("EXTRACT EMAIL FROM UEL BEFORE")
-        email_m = email_rex.search(response.text)
+        email_m = regex.search(email_rex, response.text, timeout=10)
         spider.logger.debug("EXTRACT EMAIL FROM UEL AFTER")
         if email_m and not (email_m.group(1).endswith('png') or email_m.group(1).endswith('jpg')):
             return email_m.group(1)
@@ -84,7 +84,11 @@ class ExtractShopifyEmail(scrapy.Spider):
         else:
             is_find_email = False
             spider.logger.info("MATCH CONTACT_US START... " + response.url)
-            contact_us = regex.search(contact_us_res, body, re.I, timeout=10)
+            contact_us = None
+            try:
+                contact_us = regex.search(contact_us_res, body, re.I, timeout=10)
+            except TimeoutError as e:
+                spider.logger.error("TIME OUT Find Contact US ", e)
             spider.logger.info("MATCH CONTACT_US AFTER...")
             if contact_us:
                 spider.logger.info('Find contact from main page')
@@ -95,7 +99,11 @@ class ExtractShopifyEmail(scrapy.Spider):
 
             if not is_find_email:
                 spider.logger.info("MATCH ABOUT_US START...")
-                about_us = regex.search(contact_us_res, body, re.I, timeout=10)
+                about_us = None
+                try:
+                    about_us = regex.search(contact_us_res, body, re.I, timeout=10)
+                except TimeoutError as e:
+                    spider.logger.error("TIME OUT Find About US ", e)
                 spider.logger.info("MATCH ABOUT_US AFTER...")
                 if about_us:
                     spider.logger.info('Find about from main page')
