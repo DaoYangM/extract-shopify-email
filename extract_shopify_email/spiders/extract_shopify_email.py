@@ -1,6 +1,7 @@
 import json
 import re
 
+import regex
 import requests
 import scrapy
 from redis import Redis
@@ -8,12 +9,12 @@ from scrapy.utils import spider
 
 from extract_shopify_email.settings import DEFAULT_REQUEST_HEADERS
 
-contact_us_res = re.compile(r'<a .*?href="(.*?)" .*?>contact us</a>')
-about_us_res = re.compile(r'<a .*?href="(.*?)" .*?>about us</a>')
-email_rex = re.compile(r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)")
-facebook_rex = re.compile(r'href="(https://www.facebook.com/.*?)"')
-twitter_rex = re.compile(r'href="(https://(www.)?twitter.com/.*?)"')
-instagram_rex = re.compile(r'href="(https://www.instagram.com/.*?)"')
+contact_us_res = r'<a .*?href="(.*?)" .*?>contact us</a>'
+about_us_res = r'<a .*?href="(.*?)" .*?>about us</a>'
+email_rex = r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)"
+facebook_rex = r'href="(https://www.facebook.com/.*?)"'
+twitter_rex = r'href="(https://(www.)?twitter.com/.*?)"'
+instagram_rex = r'href="(https://www.instagram.com/.*?)"'
 
 REDIS_DS_KEY = 'shopify-email'
 REDIS_RS_KEY = 'shopify-result'
@@ -60,16 +61,16 @@ class ExtractShopifyEmail(scrapy.Spider):
         client = Redis(host='www.daoyang.top', port=6379, db=0)
         body = bytes.decode(response.body, encoding=response.encoding)
 
-        email_m = email_rex.search(body)
+        email_m = regex.search(email_rex, body, timeout=10)
         spider.logger.debug("GET email_m...")
 
-        facebook_m = facebook_rex.search(body)
+        facebook_m = regex.search(facebook_rex, body, timeout=10)
         spider.logger.debug("GET facebook_m...")
 
-        twitter_m = twitter_rex.search(body)
+        twitter_m = regex.search(twitter_rex, body, timeout=10)
         spider.logger.debug("GET twitter_m...")
 
-        instagram_m = instagram_rex.search(body)
+        instagram_m = regex.search(instagram_rex, body, timeout=10)
         spider.logger.debug("GET instagram_m...")
 
         email = None
@@ -83,7 +84,7 @@ class ExtractShopifyEmail(scrapy.Spider):
         else:
             is_find_email = False
             spider.logger.info("MATCH CONTACT_US START... " + response.url)
-            contact_us = contact_us_res.search(body, re.I)
+            contact_us = regex.search(contact_us_res, body, re.I, timeout=10)
             spider.logger.info("MATCH CONTACT_US AFTER...")
             if contact_us:
                 spider.logger.info('Find contact from main page')
@@ -94,7 +95,7 @@ class ExtractShopifyEmail(scrapy.Spider):
 
             if not is_find_email:
                 spider.logger.info("MATCH ABOUT_US START...")
-                about_us = about_us_res.search(body, re.I)
+                about_us = regex.search(contact_us_res, body, re.I, timeout=10)
                 spider.logger.info("MATCH ABOUT_US AFTER...")
                 if about_us:
                     spider.logger.info('Find about from main page')
